@@ -63,11 +63,11 @@ class PostGiveCheckinCardController extends AbstractCreateController
         $range = Arr::get($request->getParsedBody(), 'range');
         $userGroup = Arr::get($request->getParsedBody(), 'userGroup');
 
-        if (!$actor->can('checkin.issuanceOfSupplementaryCards')) {
+        if (! $actor->can('checkin.issuanceOfSupplementaryCards')) {
             throw new PermissionDeniedException();
         }
 
-        if (!$range) {
+        if (! $range) {
             $separatorList = [" ", ",", "，", "|"];
             $username = explode(array_pop($separatorList), $username);
             foreach ($separatorList as $separator) {
@@ -85,6 +85,6 @@ class PostGiveCheckinCardController extends AbstractCreateController
             User::query()->increment("checkin_card", $amount);
         }
 
-//        return $history;
+        //        return $history;
     }
 }

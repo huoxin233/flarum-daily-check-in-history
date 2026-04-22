@@ -41,14 +41,14 @@ class ListCheckinHistoryController extends AbstractListController
 
         $actor = RequestUtil::getActor($request);
 
-        if (!$actor->can('checkin.allowSupplementaryCheckIn')) {
+        if (! $actor->can('checkin.allowSupplementaryCheckIn')) {
             return array();
         }
 
         $userId = Arr::get($request->getQueryParams(), 'userId');
         $startDate = Arr::get($request->getQueryParams(), 'start');
         $endDate = Arr::get($request->getQueryParams(), 'end');
-        if (!$userId) {
+        if (! $userId) {
             $userId = Arr::get($actor, 'id');
         }
 

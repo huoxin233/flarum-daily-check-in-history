@@ -24,7 +24,7 @@ export default class SupplementCheckinModal extends Modal {
     return [
       <div className="Modal-body" style="text-align: center;">
         <div className="Form-group">
-          <label className="label">{app.translator.trans('mattoid-daily-check-in-history.forum.modal.supplement-checkin-desc', {"dateStr": this.attrs.info.dateStr})}</label>
+          <label className="label">{app.translator.trans('mattoid-daily-check-in-history.forum.modal.supplement-checkin-desc', { "dateStr": this.attrs.info.dateStr })}</label>
         </div>
         <div className="Form-group">
           <Button type="submit" className="Button Button--primary PollModal-SubmitButton" loading={this.loading}>
@@ -46,9 +46,9 @@ export default class SupplementCheckinModal extends Modal {
         date: this.attrs.info.dateStr
       }
     })
-    .then((result) => {
-      console.log(result)
-    });
+      .then((result) => {
+        console.log(result)
+      });
 
     this.attrs.callback();
     this.hide();

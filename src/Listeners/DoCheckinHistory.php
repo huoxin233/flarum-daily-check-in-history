@@ -7,20 +7,23 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Mattoid\CheckinHistory\Model\UserCheckinHistory;
 use Ziven\checkin\Event\checkinUpdated;
 
-class DoCheckinHistory {
+class DoCheckinHistory
+{
     protected $settings;
     protected $events;
 
-    public function __construct(SettingsRepositoryInterface $settings, Dispatcher $events){
+    public function __construct(SettingsRepositoryInterface $settings, Dispatcher $events)
+    {
         $this->settings = $settings;
         $this->events = $events;
     }
 
-    public function checkinHistory(checkinUpdated $event){
+    public function checkinHistory(checkinUpdated $event)
+    {
         $user = $event->user;
 
         $timezone = intval($this->settings->get('ziven-forum-checkin.checkinTimeZone', 0));
-        $current_timestamp = time()+$timezone*60*60;
+        $current_timestamp = time() + $timezone * 60 * 60;
 
         $history = new UserCheckinHistory();
         $history->user_id = $user->id;

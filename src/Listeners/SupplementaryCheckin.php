@@ -24,8 +24,8 @@ class SupplementaryCheckin
     protected $extensions;
 
     public function __construct(
-        SettingsRepositoryInterface $settings, 
-        Translator $translator, 
+        SettingsRepositoryInterface $settings,
+        Translator $translator,
         Dispatcher $events,
         ConnectionInterface $connection,
         Container $container,
@@ -39,25 +39,26 @@ class SupplementaryCheckin
         $this->extensions = $extensions;
     }
 
-    public function supplementCheckin(SupplementaryCheckinEvent $event): UserCheckinHistory {
+    public function supplementCheckin(SupplementaryCheckinEvent $event): UserCheckinHistory
+    {
 
         $user = $event->user;
         $checkinDate = $event->checkinDate;
         $checkinCount = $event->checkinCount;
         $totalContinuousCheckinCountHistory = $event->totalContinuousCheckinCountHistory;
 
-        $rewardMoney = (double)$this->settings->get('mattoid-forum-checkin.reward-money') ?? 0;
-        $consumption = (double)$this->settings->get('mattoid-forum-checkin.consumption') ?? 0;
-        $checkinCard = (double)$this->settings->get('mattoid-forum-checkin.checkin-card') ?? 0;
-        $checkinIncrease = (double)$this->settings->get('mattoid-forum-checkin.checkin-increase') ?? 0;
+        $rewardMoney = (double) $this->settings->get('mattoid-forum-checkin.reward-money') ?? 0;
+        $consumption = (double) $this->settings->get('mattoid-forum-checkin.consumption') ?? 0;
+        $checkinCard = (double) $this->settings->get('mattoid-forum-checkin.checkin-card') ?? 0;
+        $checkinIncrease = (double) $this->settings->get('mattoid-forum-checkin.checkin-increase') ?? 0;
 
         $consumptionMoney = $consumption * ($checkinIncrease * $checkinCount / 100 + 1);
 
         /** @var UserCheckinHistory $history */
-        $history = $this->connection->transaction(function() use ($user, $checkinDate, $checkinCount, $totalContinuousCheckinCountHistory, $rewardMoney, $consumption, $checkinCard, $checkinIncrease, $consumptionMoney) {
-            
+        $history = $this->connection->transaction(function () use ($user, $checkinDate, $checkinCount, $totalContinuousCheckinCountHistory, $rewardMoney, $consumption, $checkinCard, $checkinIncrease, $consumptionMoney) {
+
             $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->first();
-            
+
             if ($checkinCard > 0 && $lockedUser->checkin_card <= 0) {
                 throw new ValidationException(['message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-checkin-card')]);
             }
@@ -88,20 +89,20 @@ class SupplementaryCheckin
                         preventOverdraft: true
                     );
 
-                    if (!$applied) {
+                    if (! $applied) {
                         throw new ValidationException(['message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-balance')]);
                     }
                 }
-            } elseif ($netBalanceDelta < 0 && !$this->extensions->isEnabled('antoinefr-money')) {
+            } elseif ($netBalanceDelta < 0 && ! $this->extensions->isEnabled('antoinefr-money')) {
                 // Fallback simulation if Money extension is disabled but balance tracking is somehow manual.
-                if ((float)$lockedUser->money + $netBalanceDelta < 0) {
+                if ((float) $lockedUser->money + $netBalanceDelta < 0) {
                     throw new ValidationException(['message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-balance')]);
                 }
-                $lockedUser->money = (float)$lockedUser->money + $netBalanceDelta;
+                $lockedUser->money = (float) $lockedUser->money + $netBalanceDelta;
             }
 
-            $lockedUser->total_checkin_count = (int)$lockedUser->total_checkin_count + 1;
-            $lockedUser->total_continuous_checkin_count = (int)$lockedUser->total_continuous_checkin_count + $totalContinuousCheckinCountHistory + 1;
+            $lockedUser->total_checkin_count = (int) $lockedUser->total_checkin_count + 1;
+            $lockedUser->total_continuous_checkin_count = (int) $lockedUser->total_continuous_checkin_count + $totalContinuousCheckinCountHistory + 1;
             $lockedUser->save();
 
             // 记录补签数据
@@ -119,7 +120,7 @@ class SupplementaryCheckin
             $user->total_continuous_checkin_count = $lockedUser->total_continuous_checkin_count;
             $user->money = $lockedUser->money;
             $user->checkin_card = $lockedUser->checkin_card;
-            
+
             return $historyRecord;
         });
 

@@ -37,14 +37,14 @@ class CheckinHistorySerializer extends AbstractSerializer
         $checkinColor = $checkinColor == '' ? '#2756c6' : $checkinColor;
         $supplementaryColor = $supplementaryColor == '' ? '#ff9900' : $supplementaryColor;
         $attributes = [
-            'id'               => $history->id,
-            'userId'           => $history->user_id,
-            'type'             => $history->type,
-            'totalCheckinCount'                 => $history->total_checkin_count,
-            'totalContinuousCheckinCount'       => $history->total_continuous_checkin_count,
-            'start'                  => $history->last_checkin_date,
-            'time'                   => $history->last_checkin_time,
-            'color'                  => $history->type == 1 ?  $supplementaryColor : $checkinColor
+            'id' => $history->id,
+            'userId' => $history->user_id,
+            'type' => $history->type,
+            'totalCheckinCount' => $history->total_checkin_count,
+            'totalContinuousCheckinCount' => $history->total_continuous_checkin_count,
+            'start' => $history->last_checkin_date,
+            'time' => $history->last_checkin_time,
+            'color' => $history->type == 1 ? $supplementaryColor : $checkinColor
         ];
 
         return $attributes;
