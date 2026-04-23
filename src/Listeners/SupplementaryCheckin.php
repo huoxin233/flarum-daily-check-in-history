@@ -82,7 +82,7 @@ class SupplementaryCheckin
                     $applied = $balanceManager->applyBalanceChange(
                         $lockedUser,
                         $netBalanceDelta,
-                        'SUPPLEMENTARYCHECKIN',
+                        'SUPPLEMENTARY_CHECKIN_REWARD',
                         'mattoid-daily-check-in-history.forum.supplementary-checkin-reward',
                         [],
                         $lockedUser,
