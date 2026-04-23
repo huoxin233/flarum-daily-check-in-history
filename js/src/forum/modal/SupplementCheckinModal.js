@@ -9,11 +9,10 @@ import app from 'flarum/forum/app';
 export default class SupplementCheckinModal extends Modal {
   oninit(vnode) {
     super.oninit(vnode);
-
   }
 
   title() {
-    return app.translator.trans('mattoid-daily-check-in-history.forum.modal.checkin')
+    return app.translator.trans('mattoid-daily-check-in-history.forum.modal.checkin');
   }
 
   className() {
@@ -24,7 +23,9 @@ export default class SupplementCheckinModal extends Modal {
     return [
       <div className="Modal-body" style="text-align: center;">
         <div className="Form-group">
-          <label className="label">{app.translator.trans('mattoid-daily-check-in-history.forum.modal.supplement-checkin-desc', { "dateStr": this.attrs.info.dateStr })}</label>
+          <label className="label">
+            {app.translator.trans('mattoid-daily-check-in-history.forum.modal.supplement-checkin-desc', { dateStr: this.attrs.info.dateStr })}
+          </label>
         </div>
         <div className="Form-group">
           <Button type="submit" className="Button Button--primary PollModal-SubmitButton" loading={this.loading}>
@@ -35,19 +36,19 @@ export default class SupplementCheckinModal extends Modal {
     ];
   }
 
-
   async onsubmit(e) {
     e.preventDefault();
 
-    app.request({
-      method: 'POST',
-      url: app.forum.attribute('apiUrl') + '/supplement/checkin',
-      body: {
-        date: this.attrs.info.dateStr
-      }
-    })
+    app
+      .request({
+        method: 'POST',
+        url: app.forum.attribute('apiUrl') + '/supplement/checkin',
+        body: {
+          date: this.attrs.info.dateStr,
+        },
+      })
       .then((result) => {
-        console.log(result)
+        console.log(result);
       });
 
     this.attrs.callback();
