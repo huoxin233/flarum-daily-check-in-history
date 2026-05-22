@@ -7,60 +7,47 @@ use Flarum\Foundation\ValidationException;
 use Flarum\Locale\Translator;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
+use Huoxin\MoneyWithHistory\Service\BalanceManager;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\ConnectionInterface;
 use Mattoid\CheckinHistory\Event\SupplementaryCheckinEvent;
 use Mattoid\CheckinHistory\Model\UserCheckinHistory;
-use AntoineFr\Money\Service\BalanceManager;
 
 class SupplementaryCheckin
 {
-    protected $settings;
-    protected $translator;
-    protected $events;
-    protected $connection;
-    protected $container;
-    protected $extensions;
-
     public function __construct(
-        SettingsRepositoryInterface $settings,
-        Translator $translator,
-        Dispatcher $events,
-        ConnectionInterface $connection,
-        Container $container,
-        ExtensionManager $extensions
+        protected SettingsRepositoryInterface $settings,
+        protected Translator $translator,
+        protected Dispatcher $events,
+        protected ConnectionInterface $connection,
+        protected Container $container,
+        protected ExtensionManager $extensions
     ) {
-        $this->settings = $settings;
-        $this->translator = $translator;
-        $this->events = $events;
-        $this->connection = $connection;
-        $this->container = $container;
-        $this->extensions = $extensions;
     }
 
     public function supplementCheckin(SupplementaryCheckinEvent $event): UserCheckinHistory
     {
-
         $user = $event->user;
         $checkinDate = $event->checkinDate;
         $checkinCount = $event->checkinCount;
         $totalContinuousCheckinCountHistory = $event->totalContinuousCheckinCountHistory;
 
-        $rewardMoney = (double) $this->settings->get('mattoid-forum-checkin.reward-money') ?? 0;
-        $consumption = (double) $this->settings->get('mattoid-forum-checkin.consumption') ?? 0;
-        $checkinCard = (double) $this->settings->get('mattoid-forum-checkin.checkin-card') ?? 0;
-        $checkinIncrease = (double) $this->settings->get('mattoid-forum-checkin.checkin-increase') ?? 0;
+        $rewardMoney = (float) $this->settings->get('mattoid-forum-checkin.reward-money') ?? 0;
+        $consumption = (float) $this->settings->get('mattoid-forum-checkin.consumption') ?? 0;
+        $checkinCard = (float) $this->settings->get('mattoid-forum-checkin.checkin-card') ?? 0;
+        $checkinIncrease = (float) $this->settings->get('mattoid-forum-checkin.checkin-increase') ?? 0;
 
         $consumptionMoney = $consumption * ($checkinIncrease * $checkinCount / 100 + 1);
 
         /** @var UserCheckinHistory $history */
         $history = $this->connection->transaction(function () use ($user, $checkinDate, $checkinCount, $totalContinuousCheckinCountHistory, $rewardMoney, $consumption, $checkinCard, $checkinIncrease, $consumptionMoney) {
-
             $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->first();
 
             if ($checkinCard > 0 && $lockedUser->checkin_card <= 0) {
-                throw new ValidationException(['message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-checkin-card')]);
+                throw new ValidationException([
+                    'message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-checkin-card'),
+                ]);
             }
 
             $deductCheckinCard = false;
@@ -75,29 +62,43 @@ class SupplementaryCheckin
                 $netBalanceDelta -= $consumptionMoney;
             }
 
-            if ($netBalanceDelta !== 0.0 && $this->extensions->isEnabled('antoinefr-money')) {
+            if ($netBalanceDelta !== 0.0 && $this->extensions->isEnabled('huoxin-money-with-history')) {
                 $balanceManager = $this->container->make(BalanceManager::class);
 
-                if (method_exists($balanceManager, 'applyBalanceChange')) {
-                    $applied = $balanceManager->applyBalanceChange(
-                        $lockedUser,
-                        $netBalanceDelta,
-                        'SUPPLEMENTARY_CHECKIN_REWARD',
-                        'mattoid-daily-check-in-history.forum.supplementary-checkin-reward',
-                        [],
-                        $lockedUser,
-                        preventOverdraft: true
-                    );
+                $applied = $balanceManager->applyBalanceChange(
+                    $lockedUser,
+                    $netBalanceDelta,
+                    'SUPPLEMENTARY_CHECKIN_REWARD',
+                    'mattoid-daily-check-in-history.forum.money-history.supplementary-checkin-reward',
+                    [],
+                    $lockedUser,
+                    preventOverdraft: true
+                );
 
-                    if (! $applied) {
-                        throw new ValidationException(['message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-balance')]);
-                    }
+                if (! $applied) {
+                    throw new ValidationException([
+                        'message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-balance'),
+                    ]);
                 }
-            } elseif ($netBalanceDelta < 0 && ! $this->extensions->isEnabled('antoinefr-money')) {
-                // Fallback simulation if Money extension is disabled but balance tracking is somehow manual.
+            } elseif ($netBalanceDelta !== 0.0 && $this->extensions->isEnabled('antoinefr-money')) {
+                // antoinefr-money has no BalanceManager — manual mutation with overdraft check
+                if ($netBalanceDelta < 0 && (float) $lockedUser->money + $netBalanceDelta < 0) {
+                    throw new ValidationException([
+                        'message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-balance'),
+                    ]);
+                }
+
+                $lockedUser->money = (float) $lockedUser->money + $netBalanceDelta;
+            } elseif ($netBalanceDelta < 0) {
+                // No money extension — manual overdraft check
                 if ((float) $lockedUser->money + $netBalanceDelta < 0) {
-                    throw new ValidationException(['message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-balance')]);
+                    throw new ValidationException([
+                        'message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.insufficient-balance'),
+                    ]);
                 }
+
+                $lockedUser->money = (float) $lockedUser->money + $netBalanceDelta;
+            } elseif ($netBalanceDelta > 0) {
                 $lockedUser->money = (float) $lockedUser->money + $netBalanceDelta;
             }
 
