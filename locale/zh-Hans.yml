@@ -8,7 +8,8 @@ mattoid-daily-check-in-history:
       checkin: 补签
       supplement-checkin-desc: 确认要补 {dateStr} 的签到吗？
       submit: 确认
-    supplementary-checkin-reward: 补签奖励
+    money-history:
+      supplementary-checkin-reward: 补签奖励
   admin:
     settings:
       max-supplementary-checkin: 最大连续补签数
@@ -21,7 +22,7 @@ mattoid-daily-check-in-history:
       query-others-history: 查看他人记录
       consumption: 补签花费
       reward-money: 补签奖励
-      reward-money-requirement: 需要 <code>antoinefr/flarum-ext-money</code> 扩展
+      reward-money-requirement: 需要 <code>antoinefr/flarum-ext-money</code> 或者 <code>huoxin/money-with-history</code> 扩展
       checkin-range: 补签范围
       checkin-range-requirement: 允许补签设置天数以内的签到
       checkin-position: 补签位置

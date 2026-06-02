@@ -8,7 +8,8 @@ mattoid-daily-check-in-history:
       checkin: checkin
       supplement-checkin-desc: Are you sure you want to supplement the check-in for {dateStr}?
       submit: yes
-    supplementary-checkin-reward: Supplementary signing rewards
+    money-history:
+      supplementary-checkin-reward: Supplementary signing rewards
   admin:
     settings:
       max-supplementary-checkin: max continuous supplementary checkin
@@ -21,7 +22,7 @@ mattoid-daily-check-in-history:
       query-others-history: View Others' Records
       consumption: consumption
       reward-money: reward money
-      reward-money-requirement: Requires the <code>antoinefr/flarum-ext-money</code> extension
+      reward-money-requirement: Requires the <code>antoinefr/flarum-ext-money</code> or <code>huoxin/money-with-history</code> extension
       checkin-range: supplementary checkin range
       checkin-range-requirement: Allow supplementary sign-in within the set number of days
       checkin-position: checkin position

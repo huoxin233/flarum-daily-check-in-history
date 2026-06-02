@@ -3,15 +3,21 @@ import Button from 'flarum/common/components/Button';
 import SendMoneyModal from './components/SendMoneyModal';
 
 app.initializers.add('mattoid-daily-check-in-history', () => {
-
-  app.extensionData.for("mattoid-daily-check-in-history")
+  app.extensionData
+    .for('mattoid-daily-check-in-history')
     .registerSetting(function () {
-      return m('.Form-group', Button.component({
-        className: 'Button',
-        onclick() {
-          app.modal.show(SendMoneyModal);
-        },
-      }, app.translator.trans('mattoid-daily-check-in-history.admin.settings.complimentary-supplementary-card')));
+      return m(
+        '.Form-group',
+        Button.component(
+          {
+            className: 'Button',
+            onclick() {
+              app.modal.show(SendMoneyModal);
+            },
+          },
+          app.translator.trans('mattoid-daily-check-in-history.admin.settings.complimentary-supplementary-card')
+        )
+      );
     })
     .registerSetting({
       setting: 'mattoid-forum-checkin.max-supplementary-checkin',
@@ -60,8 +66,8 @@ app.initializers.add('mattoid-daily-check-in-history', () => {
       label: app.translator.trans('mattoid-daily-check-in-history.admin.settings.checkin-position'),
       help: app.translator.trans('mattoid-daily-check-in-history.admin.settings.checkin-position-requirement'),
       type: 'select',
-      options: {0 : "小药店", 1 : "用户中心（日历）"},
-      default: 0
+      options: { 0: '小药店', 1: '用户中心（日历）' },
+      default: 0,
     })
     .registerSetting({
       setting: 'mattoid-forum-checkin.min-supplementary-date',
@@ -104,6 +110,8 @@ app.initializers.add('mattoid-daily-check-in-history', () => {
         icon: 'fas fa-id-card',
         label: app.translator.trans('mattoid-daily-check-in-history.admin.settings.query-others-history'),
         permission: 'checkin.queryOthersHistory',
-        allowGuest: true
-      }, 'view')
+        allowGuest: true,
+      },
+      'view'
+    );
 });

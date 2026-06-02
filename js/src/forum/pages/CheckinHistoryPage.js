@@ -1,9 +1,8 @@
 import UserPage from 'flarum/forum/components/UserPage';
-import dynamicallyLoadLib from "../utils/dynamicallyLoadLib";
-import SupplementCheckinModal from "../modal/SupplementCheckinModal";
+import dynamicallyLoadLib from '../utils/dynamicallyLoadLib';
+import SupplementCheckinModal from '../modal/SupplementCheckinModal';
 
 export default class CheckinHistoryPage extends UserPage {
-
   // calendar = null;
 
   // 初始化时候，方便放一些准备用的数据，或者用来网络请求。此时可以拿到 vnode，但是不一定拿得到真实 DOM，所以这里不推荐进行相关的 DOM 操作，比如：vnode.dom。
@@ -22,8 +21,12 @@ export default class CheckinHistoryPage extends UserPage {
           {this.loading && (
             <div class="DiscussionList">
               <div class="DiscussionList-loadMore">
-                <div aria-label="loading…" role="status" data-size="medium"
-                     class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+                <div
+                  aria-label="loading…"
+                  role="status"
+                  data-size="medium"
+                  class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
+                >
                   <div aria-hidden="true" class="LoadingIndicator"></div>
                 </div>
               </div>
@@ -40,24 +43,16 @@ export default class CheckinHistoryPage extends UserPage {
   }
 
   // DOM 渲染刷新后。业务有刷新变动数据时候使用。
-  onupdate() {
-
-  }
+  onupdate() {}
 
   // DOM 销毁前。常用，比如我们的离开动画。
-  onbeforeremove() {
-
-  }
+  onbeforeremove() {}
 
   // DOM 渲染刷新前。业务有刷新变动数据时候使用。
-  onremove() {
-
-  }
+  onremove() {}
 
   // DOM 渲染刷新前。业务有刷新变动数据时候使用。
-  onbeforeupdate() {
-
-  }
+  onbeforeupdate() {}
 
   async getData(info, successCb, failureCb) {
     this.loading = true;
@@ -65,7 +60,7 @@ export default class CheckinHistoryPage extends UserPage {
       start: info.start.toISOString(),
       end: info.end.toISOString(),
       username: this.user.slug(),
-      userId: this.user.id()
+      userId: this.user.id(),
     });
 
     return this.history.payload.data.map((item) => {
@@ -83,12 +78,12 @@ export default class CheckinHistoryPage extends UserPage {
 
     this.calendar = new FullCalendar.Calendar(calendarEl, {
       locale: app.translator.getLocale(),
-      allDayText: "今天",
+      allDayText: '今天',
       initialView: 'dayGridMonth',
       dateClick: function (info) {
         openModal(info);
       },
-      events: (info, successCb, failureCb) => this.getData(info, successCb, failureCb)
+      events: (info, successCb, failureCb) => this.getData(info, successCb, failureCb),
     });
     this.calendar.render();
   }
@@ -107,10 +102,12 @@ export default class CheckinHistoryPage extends UserPage {
       }
     }
 
-    app.modal.show(SupplementCheckinModal, {info, callback: () => {
-      this.getData(this.calendar.currentData.dateProfile.activeRange, null, null);
-      this.calendar.refetchEvents()
-    }})
+    app.modal.show(SupplementCheckinModal, {
+      info,
+      callback: () => {
+        this.getData(this.calendar.currentData.dateProfile.activeRange, null, null);
+        this.calendar.refetchEvents();
+      },
+    });
   }
-
 }
