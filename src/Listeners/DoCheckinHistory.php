@@ -5,7 +5,7 @@ namespace Mattoid\CheckinHistory\Listeners;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Contracts\Events\Dispatcher;
 use Mattoid\CheckinHistory\Model\UserCheckinHistory;
-use Ziven\checkin\Event\checkinUpdated;
+use Ziven\DailyCheckin\Event\CheckinUpdated;
 
 class DoCheckinHistory
 {
@@ -18,7 +18,7 @@ class DoCheckinHistory
         $this->events = $events;
     }
 
-    public function checkinHistory(checkinUpdated $event)
+    public function checkinHistory(CheckinUpdated $event)
     {
         $user = $event->user;
 

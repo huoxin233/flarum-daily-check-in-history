@@ -16,7 +16,7 @@ use Mattoid\CheckinHistory\Event\SupplementaryCheckinEvent;
 use Mattoid\CheckinHistory\Listeners\SupplementaryCheckin;
 use Mattoid\CheckinHistory\Middleware\UserAuthMiddleware;
 use Mattoid\CheckinHistory\Listeners\DoCheckinHistory;
-use Ziven\checkin\Event\checkinUpdated;
+use Ziven\DailyCheckin\Event\CheckinUpdated;
 
 return [
     (new Extend\Frontend('forum'))
@@ -30,7 +30,7 @@ return [
 
     (new Extend\Middleware("api"))->add(UserAuthMiddleware::class),
 
-    (new Extend\Event())->listen(checkinUpdated::class, [DoCheckinHistory::class, 'checkinHistory']),
+    (new Extend\Event())->listen(CheckinUpdated::class, [DoCheckinHistory::class, 'checkinHistory']),
     (new Extend\Event())->listen(SupplementaryCheckinEvent::class, [SupplementaryCheckin::class, 'supplementCheckin']),
 
     (new Extend\ApiSerializer(BasicUserSerializer::class))
