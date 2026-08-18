@@ -15,6 +15,14 @@ mattoid-daily-check-in-history:
   admin:
     modal:
       give-success: "成功向 {count} 位用户发放补签卡。"
+    sections:
+      quick-actions: "快捷操作"
+      quick-actions-desc: "向指定用户或全站批量发放补签卡道具。"
+      rules: "补签规则与限制"
+      economy: "经济与费用规则"
+      appearance: "视觉外观与定制"
+      cdn: "静态资源与 CDN 加速"
+      cdn-help: "自定义 FullCalendar 资源的完整下载地址与 SRI 校验。留空则默认使用论坛本地内置静态资源。"
     settings:
       max-supplementary-checkin: "最大连续补签数"
       max-supplementary-checkin-requirement: "允许签到最大连续补签的天数，若中间有已签到的日期则重新计算连续补签天数"

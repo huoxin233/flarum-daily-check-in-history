@@ -15,6 +15,14 @@ mattoid-daily-check-in-history:
   admin:
     modal:
       give-success: "Successfully granted check-in cards to {count} user(s)."
+    sections:
+      quick-actions: "Quick Actions"
+      quick-actions-desc: "Batch grant check-in cards to specific users or all users."
+      rules: "Check-in Rules & Limits"
+      economy: "Economy & Costs"
+      appearance: "Appearance & Display"
+      cdn: "Static Assets & CDN"
+      cdn-help: "Custom full download URLs and SRI hashes for FullCalendar. Leave empty to use local forum assets."
     settings:
       max-supplementary-checkin: "Max Continuous Supplementary Check-in"
       max-supplementary-checkin-requirement: "The maximum number of consecutive days allowed for supplementary check-in. If there is an already checked-in date in between, consecutive days will be recalculated."
