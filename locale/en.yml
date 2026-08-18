@@ -41,6 +41,10 @@ mattoid-daily-check-in-history:
       checkin-color: Check-in Color
       supplementary-color: Supplementary Check-in Color
       min-supplementary-date: Earliest Supplementary Check-in Date
+      cdn-fullcalendar-url: FullCalendar JS URL
+      cdn-fullcalendar-sri: FullCalendar JS SRI Hash
+      cdn-locales-url: FullCalendar Locales JS URL
+      cdn-locales-sri: FullCalendar Locales JS SRI Hash
       submit-give: Grant
       user-all: All Users
       give-number: Quantity

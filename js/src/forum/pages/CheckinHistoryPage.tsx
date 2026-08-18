@@ -84,8 +84,8 @@ export default class CheckinHistoryPage extends UserPage {
   }
 
   async renderCalendar(): Promise<void> {
-    await dynamicallyLoadLib('fullcalendarCore');
-    await dynamicallyLoadLib(['fullcalendarLocales', 'fullcalendarDayGrid', 'fullcalendarInteraction', 'fullcalendarList']);
+    await dynamicallyLoadLib('fullcalendar');
+    await dynamicallyLoadLib('fullcalendarLocales');
 
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) {

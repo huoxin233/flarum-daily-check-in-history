@@ -41,6 +41,10 @@ mattoid-daily-check-in-history:
       checkin-color: 签到颜色
       supplementary-color: 补签颜色
       min-supplementary-date: 允许最早补签日
+      cdn-fullcalendar-url: FullCalendar 主脚本 URL 路径
+      cdn-fullcalendar-sri: FullCalendar 主脚本 SRI 校验哈希
+      cdn-locales-url: FullCalendar 语言包 JS URL 路径
+      cdn-locales-sri: FullCalendar 语言包 JS SRI 校验哈希
       submit-give: 赠送
       user-all: 所有用户
       give-number: 赠送数量

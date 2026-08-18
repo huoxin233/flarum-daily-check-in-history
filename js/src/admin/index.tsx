@@ -90,6 +90,31 @@ app.initializers.add('mattoid-daily-check-in-history', () => {
       default: '#ff9900',
       type: 'text',
     })
+    // FullCalendar Custom URL & SRI Settings
+    .registerSetting({
+      setting: 'mattoid-forum-checkin.cdn-fullcalendar-url',
+      label: app.translator.trans('mattoid-daily-check-in-history.admin.settings.cdn-fullcalendar-url'),
+      placeholder: 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js',
+      type: 'text',
+    })
+    .registerSetting({
+      setting: 'mattoid-forum-checkin.cdn-fullcalendar-sri',
+      label: app.translator.trans('mattoid-daily-check-in-history.admin.settings.cdn-fullcalendar-sri'),
+      placeholder: 'sha384-...',
+      type: 'text',
+    })
+    .registerSetting({
+      setting: 'mattoid-forum-checkin.cdn-locales-url',
+      label: app.translator.trans('mattoid-daily-check-in-history.admin.settings.cdn-locales-url'),
+      placeholder: 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js',
+      type: 'text',
+    })
+    .registerSetting({
+      setting: 'mattoid-forum-checkin.cdn-locales-sri',
+      label: app.translator.trans('mattoid-daily-check-in-history.admin.settings.cdn-locales-sri'),
+      placeholder: 'sha384-...',
+      type: 'text',
+    })
     .registerPermission(
       {
         icon: 'fas fa-id-card',
