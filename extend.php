@@ -9,12 +9,14 @@
  * file that was distributed with this source code.
  */
 
+use Flarum\Api\Serializer\ForumSerializer;
+use Flarum\Api\Serializer\UserSerializer;
 use Flarum\Extend;
-use Flarum\Api\Serializer\BasicUserSerializer;
-use Mattoid\CheckinHistory\Attributes\UserAttributes;
-use Mattoid\CheckinHistory\Event\SupplementaryCheckinEvent;
-use Mattoid\CheckinHistory\Listeners\SupplementaryCheckin;
-use Mattoid\CheckinHistory\Middleware\UserAuthMiddleware;
+use Mattoid\CheckinHistory\Api\Controller\ListCheckinHistoryController;
+use Mattoid\CheckinHistory\Api\Controller\PostCheckinHistoryController;
+use Mattoid\CheckinHistory\Api\Controller\PostGiveCheckinCardController;
+use Mattoid\CheckinHistory\Api\Serializer\AddForumAttributes;
+use Mattoid\CheckinHistory\Api\Serializer\AddUserAttributes;
 use Mattoid\CheckinHistory\Listeners\DoCheckinHistory;
 use Ziven\DailyCheckin\Event\CheckinUpdated;
 
@@ -23,21 +25,24 @@ return [
         ->js(__DIR__.'/js/dist/forum.js')
         ->css(__DIR__.'/less/forum.less')
         ->route('/u/{username}/checkin/history', 'mattoid-daily-check-in-history.forum.page.link-name'),
+
     (new Extend\Frontend('admin'))
         ->js(__DIR__.'/js/dist/admin.js')
         ->css(__DIR__.'/less/admin.less'),
+
     new Extend\Locales(__DIR__.'/locale'),
 
-    (new Extend\Middleware("api"))->add(UserAuthMiddleware::class),
+    (new Extend\Event())
+        ->listen(CheckinUpdated::class, [DoCheckinHistory::class, 'checkinHistory']),
 
-    (new Extend\Event())->listen(CheckinUpdated::class, [DoCheckinHistory::class, 'checkinHistory']),
-    (new Extend\Event())->listen(SupplementaryCheckinEvent::class, [SupplementaryCheckin::class, 'supplementCheckin']),
+    (new Extend\ApiSerializer(ForumSerializer::class))
+        ->attributes(AddForumAttributes::class),
 
-    (new Extend\ApiSerializer(BasicUserSerializer::class))
-        ->attributes(UserAttributes::class),
+    (new Extend\ApiSerializer(UserSerializer::class))
+        ->attributes(AddUserAttributes::class),
 
     (new Extend\Routes('api'))
-        ->get('/checkin/history', 'checkin.history', Mattoid\CheckinHistory\Api\Controller\ListCheckinHistoryController::class)
-        ->post('/supplement/checkin', 'supplement.checkin', Mattoid\CheckinHistory\Api\Controller\PostCheckinHistoryController::class)
-        ->post('/give/checkin/card', 'give.checkin-card', Mattoid\CheckinHistory\Api\Controller\PostGiveCheckinCardController::class)
+        ->get('/checkin/history', 'checkin.history', ListCheckinHistoryController::class)
+        ->post('/supplement/checkin', 'supplement.checkin', PostCheckinHistoryController::class)
+        ->post('/give/checkin/card', 'give.checkin-card', PostGiveCheckinCardController::class),
 ];

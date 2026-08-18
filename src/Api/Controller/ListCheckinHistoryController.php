@@ -1,19 +1,11 @@
 <?php
 
-/*
- * This file is part of askvortsov/flarum-moderator-warnings
- *
- *  Copyright (c) 2021 Alexander Skvortsov.
- *
- *  For detailed copyright and license information, please view the
- *  LICENSE file that was distributed with this source code.
- */
-
 namespace Mattoid\CheckinHistory\Api\Controller;
 
 use Flarum\Api\Controller\AbstractListController;
 use Flarum\Http\RequestUtil;
 use Flarum\User\Exception\PermissionDeniedException;
+use Flarum\User\User;
 use Illuminate\Support\Arr;
 use Mattoid\CheckinHistory\Api\Serializer\CheckinHistorySerializer;
 use Mattoid\CheckinHistory\Model\UserCheckinHistory;
@@ -24,36 +16,58 @@ class ListCheckinHistoryController extends AbstractListController
 {
     public $serializer = CheckinHistorySerializer::class;
 
-    public $include = ['warnedUser', 'addedByUser', 'hiddenByUser', 'post', 'post.discussion', 'post.user'];
+    public $include = ['user'];
 
-    /**
-     * Get the data to be serialized and assigned to the response document.
-     *
-     * @param ServerRequestInterface $request
-     * @param Document               $document
-     *
-     * @throws PermissionDeniedException
-     *
-     * @return mixed
-     */
     protected function data(ServerRequestInterface $request, Document $document)
     {
-
         $actor = RequestUtil::getActor($request);
+        $params = $request->getQueryParams();
 
-        if (! $actor->can('checkin.allowSupplementaryCheckIn')) {
-            return array();
+        $userId = Arr::get($params, 'userId');
+        $username = Arr::get($params, 'username');
+        $start = Arr::get($params, 'start');
+        $end = Arr::get($params, 'end');
+
+        // Resolve target user
+        $targetUser = null;
+        if ($userId) {
+            $targetUser = User::query()->find($userId);
+        } elseif ($username) {
+            $targetUser = User::query()->where('username', $username)->first();
+        } elseif (! $actor->isGuest()) {
+            $targetUser = $actor;
         }
 
-        $userId = Arr::get($request->getQueryParams(), 'userId');
-        $startDate = Arr::get($request->getQueryParams(), 'start');
-        $endDate = Arr::get($request->getQueryParams(), 'end');
-        if (! $userId) {
-            $userId = Arr::get($actor, 'id');
+        if (! $targetUser) {
+            return [];
         }
 
-        return UserCheckinHistory::where('user_id', $userId)->where('last_checkin_date', ">=", $startDate)
-            ->where('last_checkin_date', "<=", $endDate)->get();
+        // Permission check: viewing own history vs viewing others' history
+        $isSelf = ! $actor->isGuest() && $actor->id === $targetUser->id;
+        if (! $isSelf && ! $actor->can('checkin.queryOthersHistory')) {
+            throw new PermissionDeniedException();
+        }
 
+        $query = UserCheckinHistory::query()
+            ->where('user_id', $targetUser->id)
+            ->with('user');
+
+        // Normalize start date (accepts Y-m-d or ISO 8601 strings)
+        if (! empty($start)) {
+            $startDate = substr((string) $start, 0, 10);
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate)) {
+                $query->where('last_checkin_date', '>=', $startDate);
+            }
+        }
+
+        // Normalize end date (accepts Y-m-d or ISO 8601 strings)
+        if (! empty($end)) {
+            $endDate = substr((string) $end, 0, 10);
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDate)) {
+                $query->where('last_checkin_date', '<=', $endDate);
+            }
+        }
+
+        return $query->orderBy('last_checkin_date', 'asc')->get();
     }
 }
