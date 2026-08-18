@@ -1,4 +1,6 @@
-import User from 'flarum/common/models/User';
+import 'flarum/common/models/User';
+import 'flarum/forum/components/UserPage';
+import 'flarum/forum/components/UserCard';
 
 declare module 'flarum/common/models/User' {
   export default interface User {
@@ -9,15 +11,15 @@ declare module 'flarum/common/models/User' {
 
 declare module 'flarum/forum/components/UserPage' {
   export default interface UserPage {
-    user: User | null;
-    loadUser(username: string): void;
+    user: any;
+    loadUser(username: string): any;
   }
 }
 
 declare module 'flarum/forum/components/UserCard' {
   export default interface UserCard {
     attrs: {
-      user: User;
+      user?: any;
       [key: string]: any;
     };
   }

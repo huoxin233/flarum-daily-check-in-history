@@ -1,22 +1,23 @@
 import app from 'flarum/admin/app';
 import Button from 'flarum/common/components/Button';
+import extractText from 'flarum/common/utils/extractText';
 import SendMoneyModal from './components/SendMoneyModal';
 
 app.initializers.add('mattoid-daily-check-in-history', () => {
   app.extensionData
     .for('mattoid-daily-check-in-history')
     .registerSetting(function () {
-      return m(
-        '.Form-group',
-        Button.component(
-          {
-            className: 'Button',
-            onclick() {
+      return (
+        <div className="Form-group">
+          <Button
+            className="Button"
+            onclick={() => {
               app.modal.show(SendMoneyModal);
-            },
-          },
-          app.translator.trans('mattoid-daily-check-in-history.admin.settings.complimentary-supplementary-card')
-        )
+            }}
+          >
+            {app.translator.trans('mattoid-daily-check-in-history.admin.settings.complimentary-supplementary-card')}
+          </Button>
+        </div>
       );
     })
     .registerSetting({
@@ -66,13 +67,15 @@ app.initializers.add('mattoid-daily-check-in-history', () => {
       label: app.translator.trans('mattoid-daily-check-in-history.admin.settings.checkin-position'),
       help: app.translator.trans('mattoid-daily-check-in-history.admin.settings.checkin-position-requirement'),
       type: 'select',
-      options: { 0: '小药店', 1: '用户中心（日历）' },
+      options: {
+        0: extractText(app.translator.trans('mattoid-daily-check-in-history.admin.settings.checkin-position-options.sidebar')),
+        1: extractText(app.translator.trans('mattoid-daily-check-in-history.admin.settings.checkin-position-options.calendar')),
+      },
       default: 0,
     })
     .registerSetting({
       setting: 'mattoid-forum-checkin.min-supplementary-date',
       label: app.translator.trans('mattoid-daily-check-in-history.admin.settings.min-supplementary-date'),
-      default: '#2756c6',
       type: 'date',
     })
     .registerSetting({
