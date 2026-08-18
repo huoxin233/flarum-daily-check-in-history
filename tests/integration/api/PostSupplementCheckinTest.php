@@ -17,6 +17,7 @@ class PostSupplementCheckinTest extends TestCase
     {
         parent::setUp();
 
+        $this->extension('huoxin-money-with-history');
         $this->extension('ziiven-daily-check-in');
         $this->extension('mattoid-daily-check-in-history');
         $this->setting('mattoid-forum-checkin.span-day-checkin', '1');
@@ -45,8 +46,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $pastDate,
-                    ])
+                'date' => $pastDate,
+            ])
         );
 
         $this->assertEquals(201, $response->getStatusCode());
@@ -89,8 +90,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $pastDate,
-                    ])
+                'date' => $pastDate,
+            ])
         );
 
         $this->assertEquals(403, $response->getStatusCode());
@@ -111,8 +112,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => 'invalid-date',
-                    ])
+                'date' => 'invalid-date',
+            ])
         );
 
         $this->assertEquals(422, $response->getStatusCode());
@@ -135,8 +136,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $futureDate,
-                    ])
+                'date' => $futureDate,
+            ])
         );
 
         $this->assertEquals(422, $response->getStatusCode());
@@ -173,8 +174,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $date,
-                    ])
+                'date' => $date,
+            ])
         );
 
         $this->assertEquals(422, $response->getStatusCode());
@@ -200,8 +201,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $tooEarlyDate,
-                    ])
+                'date' => $tooEarlyDate,
+            ])
         );
 
         $this->assertEquals(422, $response->getStatusCode());
@@ -227,8 +228,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $tooOldDate,
-                    ])
+                'date' => $tooOldDate,
+            ])
         );
 
         $this->assertEquals(422, $response->getStatusCode());
@@ -253,8 +254,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $threeDaysAgo,
-                    ])
+                'date' => $threeDaysAgo,
+            ])
         );
 
         $this->assertEquals(422, $response->getStatusCode());
@@ -295,8 +296,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $yesterday,
-                    ])
+                'date' => $yesterday,
+            ])
         );
 
         $this->assertEquals(201, $response->getStatusCode());
@@ -348,8 +349,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $day3,
-                    ])
+                'date' => $day3,
+            ])
         );
 
         $this->assertEquals(422, $response->getStatusCode());
@@ -381,8 +382,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $pastDate,
-                    ])
+                'date' => $pastDate,
+            ])
         );
 
         $this->assertEquals(201, $response->getStatusCode());
@@ -419,8 +420,127 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $pastDate,
-                    ])
+                'date' => $pastDate,
+            ])
+        );
+
+        $this->assertEquals(422, $response->getStatusCode());
+    }
+
+    /**
+     * @test
+     */
+    public function gives_reward_money_when_supplementing_with_checkin_card()
+    {
+        $this->prepareDatabase([
+            'group_permission' => [
+                ['permission' => 'checkin.allowSupplementaryCheckIn', 'group_id' => 3],
+            ],
+            'users' => [
+                [
+                    'id' => 2,
+                    'username' => 'normal',
+                    'email' => 'normal@machine.local',
+                    'is_email_confirmed' => 1,
+                    'checkin_card' => 1,
+                    'money' => 5.0,
+                ],
+            ],
+        ]);
+
+        $this->setting('mattoid-forum-checkin.consumption', '0');
+        $this->setting('mattoid-forum-checkin.reward-money', '10');
+
+        $pastDate = date('Y-m-d', strtotime('-1 day'));
+
+        $response = $this->send(
+            $this->request('POST', '/api/supplement/checkin', [
+                'authenticatedAs' => 2,
+            ])->withParsedBody([
+                'date' => $pastDate,
+            ])
+        );
+
+        $this->assertEquals(201, $response->getStatusCode());
+
+        $user = User::query()->find(2);
+        $this->assertEquals(0, $user->checkin_card);
+        $this->assertEquals(15.0, (float) $user->money); // 5 + 10 reward
+    }
+
+    /**
+     * @test
+     */
+    public function deducts_money_when_no_card_and_awards_reward_money()
+    {
+        $this->prepareDatabase([
+            'group_permission' => [
+                ['permission' => 'checkin.allowSupplementaryCheckIn', 'group_id' => 3],
+            ],
+            'users' => [
+                [
+                    'id' => 2,
+                    'username' => 'normal',
+                    'email' => 'normal@machine.local',
+                    'is_email_confirmed' => 1,
+                    'checkin_card' => 0,
+                    'money' => 50.0,
+                ],
+            ],
+        ]);
+
+        $this->setting('mattoid-forum-checkin.consumption', '10');
+        $this->setting('mattoid-forum-checkin.reward-money', '2');
+
+        $pastDate = date('Y-m-d', strtotime('-1 day'));
+
+        $response = $this->send(
+            $this->request('POST', '/api/supplement/checkin', [
+                'authenticatedAs' => 2,
+            ])->withParsedBody([
+                'date' => $pastDate,
+            ])
+        );
+
+        $this->assertEquals(201, $response->getStatusCode());
+
+        $user = User::query()->find(2);
+        // 50 - 10 (consumption) + 2 (reward) = 42
+        $this->assertEquals(42.0, (float) $user->money);
+    }
+
+    /**
+     * @test
+     */
+    public function blocks_supplement_when_money_balance_insufficient()
+    {
+        $this->prepareDatabase([
+            'group_permission' => [
+                ['permission' => 'checkin.allowSupplementaryCheckIn', 'group_id' => 3],
+            ],
+            'users' => [
+                [
+                    'id' => 2,
+                    'username' => 'normal',
+                    'email' => 'normal@machine.local',
+                    'is_email_confirmed' => 1,
+                    'checkin_card' => 0,
+                    'money' => 20.0, // Not enough for 100
+                ],
+            ],
+        ]);
+
+        $this->setting('mattoid-forum-checkin.consumption', '100');
+        $this->setting('mattoid-forum-checkin.reward-money', '0');
+
+        $pastDate = date('Y-m-d', strtotime('-1 day'));
+
+        $response = $this->send(
+            $this->request('POST', '/api/supplement/checkin', [
+                'authenticatedAs' => 2,
+            ])->withParsedBody([
+                'date' => $pastDate,
+            ])
         );
 
         $this->assertEquals(422, $response->getStatusCode());
@@ -470,8 +590,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $day2,
-                    ])
+                'date' => $day2,
+            ])
         );
 
         $this->assertEquals(201, $response->getStatusCode());
@@ -509,8 +629,8 @@ class PostSupplementCheckinTest extends TestCase
             $this->request('POST', '/api/supplement/checkin', [
                 'authenticatedAs' => 2,
             ])->withParsedBody([
-                        'date' => $pastDate,
-                    ])
+                'date' => $pastDate,
+            ])
         );
 
         $this->assertEquals(201, $response->getStatusCode());

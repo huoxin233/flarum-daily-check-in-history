@@ -42,7 +42,7 @@ class DoCheckinHistoryTest extends TestCase
 
         /** @var Dispatcher $events */
         $events = $this->app()->getContainer()->make(Dispatcher::class);
-        $events->dispatch(new CheckinUpdated($user, 1));
+        $events->dispatch(new CheckinUpdated($user));
 
         $count = UserCheckinHistory::query()->where('user_id', 2)->count();
         $this->assertEquals(1, $count);
@@ -69,11 +69,11 @@ class DoCheckinHistoryTest extends TestCase
         $events = $this->app()->getContainer()->make(Dispatcher::class);
 
         // Fire twice
-        $events->dispatch(new CheckinUpdated($user, 1));
+        $events->dispatch(new CheckinUpdated($user));
 
         $user->total_checkin_count = 2;
         $user->save();
-        $events->dispatch(new CheckinUpdated($user, 2));
+        $events->dispatch(new CheckinUpdated($user));
 
         $count = UserCheckinHistory::query()->where('user_id', 2)->count();
         $this->assertEquals(1, $count);
