@@ -23,6 +23,8 @@ class UserCheckinHistory extends AbstractModel
 
     public $timestamps = false;
 
+    protected $guarded = ['id'];
+
     protected $dates = [
         'last_checkin_time',
     ];
