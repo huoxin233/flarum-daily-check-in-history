@@ -3,14 +3,14 @@
 namespace Mattoid\CheckinHistory\Listeners;
 
 use Carbon\Carbon;
-use Flarum\Settings\SettingsRepositoryInterface;
+use Mattoid\CheckinHistory\CheckinHistoryManager;
 use Mattoid\CheckinHistory\Model\UserCheckinHistory;
 use Ziven\DailyCheckin\Event\CheckinUpdated;
 
 class DoCheckinHistory
 {
     public function __construct(
-        protected SettingsRepositoryInterface $settings
+        protected CheckinHistoryManager $historyManager
     ) {
     }
 
@@ -21,9 +21,7 @@ class DoCheckinHistory
             return;
         }
 
-        $timezone = (int) $this->settings->get('ziven-forum-checkin.checkinTimeZone', 0);
-        $currentTimestamp = time() + ($timezone * 3600);
-        $checkinDate = gmdate('Y-m-d', $currentTimestamp);
+        $checkinDate = $this->historyManager->getTodayDate();
 
         // Prevent duplicate records for the same day
         $history = UserCheckinHistory::query()->firstOrNew([
