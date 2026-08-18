@@ -2,37 +2,40 @@
 
 namespace Mattoid\CheckinHistory\Model;
 
+use Carbon\Carbon;
 use Flarum\Database\AbstractModel;
-use Flarum\Formatter\Formatter;
+use Flarum\User\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $type 0: normal check-in, 1: supplementary check-in
+ * @property string $last_checkin_date
+ * @property int $total_checkin_count
+ * @property int $total_continuous_checkin_count
+ * @property Carbon $last_checkin_time
+ * @property-read User|null $user
+ */
 class UserCheckinHistory extends AbstractModel
 {
-    protected $table = "user_checkin_history";
+    protected $table = 'user_checkin_history';
 
-    /**
-     * The text formatter instance.
-     *
-     * @var \Flarum\Formatter\Formatter
-     */
-    protected static $formatter;
+    public $timestamps = false;
 
-    /**
-     * Get the text formatter instance.
-     *
-     * @return \Flarum\Formatter\Formatter
-     */
-    public static function getFormatter()
+    protected $dates = [
+        'last_checkin_time',
+    ];
+
+    protected $casts = [
+        'user_id' => 'integer',
+        'type' => 'integer',
+        'total_checkin_count' => 'integer',
+        'total_continuous_checkin_count' => 'integer',
+    ];
+
+    public function user(): BelongsTo
     {
-        return static::$formatter;
-    }
-
-    /**
-     * Set the text formatter instance.
-     *
-     * @param \Flarum\Formatter\Formatter $formatter
-     */
-    public static function setFormatter(Formatter $formatter)
-    {
-        static::$formatter = $formatter;
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
