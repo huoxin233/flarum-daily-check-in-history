@@ -4,6 +4,8 @@ mattoid-daily-check-in-history:
       link-name: 签到历史
       title: 签到历史
       checkin-card: 补签卡
+      checkin-card-count: 补签卡：{count}
+      today: 今天
     modal:
       checkin: 补签
       supplement-checkin-desc: 确认要补 {dateStr} 的签到吗？
@@ -11,6 +13,8 @@ mattoid-daily-check-in-history:
     money-history:
       supplementary-checkin-reward: 补签奖励
   admin:
+    modal:
+      give-success: 成功向 {count} 位用户发放补签卡。
     settings:
       max-supplementary-checkin: 最大连续补签数
       max-supplementary-checkin-requirement: 允许签到最大连续补签的天数，若中间有已签到的日期则重新计算连续补签天数
@@ -27,6 +31,9 @@ mattoid-daily-check-in-history:
       checkin-range-requirement: 允许补签设置天数以内的签到
       checkin-position: 补签位置
       checkin-position-requirement: 补签功能在以下位置进行操作，如果选择小药店，则不展示补签卡商品。若选择日历，则可以使用补签卡或者扣除费用等方式
+      checkin-position-options:
+        sidebar: 小药店
+        calendar: 用户中心（日历）
       checkin-card: 仅限补签卡
       checkin-card-requirement: 开启后将不消耗金钱，但补签卡不足时不允许补签
       checkin-increase: 补签花费增量(%)
@@ -44,6 +51,12 @@ mattoid-daily-check-in-history:
       range-help: 勾选：用户名不可编辑且不生效，未勾选：用户名必填，仅发送给对应用户
   api:
     error:
+      already-checked-in: 签到失败，{date} 已有签到记录
+      date-required: 签到日期不能为空
+      invalid-date: 日期格式不正确，必须为 YYYY-MM-DD
+      invalid-amount: 赠送数量必须大于 0
+      empty-usernames: 请至少输入一个用户名
+      invalid-usernames: 请输入有效的用户名
       checkin-range: 补签请求超出有效范围，不允许补签超过{day}天的记录
       max-supplementary-checkin: 连续补签超出限制，允许最大连续补签{day}天
       span-day-checkin: 签到失败，{date}之后有未签到记录，不允许跨天签到
