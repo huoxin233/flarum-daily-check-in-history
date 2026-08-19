@@ -55,35 +55,60 @@ const getLibs = (): Record<string, LibConfig> => ({
   },
 });
 
-export default function dynamicallyLoadLib(lib: string): Promise<void> {
+const scriptLoadingPromises = new Map<string, Promise<void>>();
+
+function loadScript(item: LibItem): Promise<void> {
+  if (scriptLoadingPromises.has(item.url)) {
+    return scriptLoadingPromises.get(item.url)!;
+  }
+
+  const existingScript = document.querySelector<HTMLScriptElement>(`script[src="${item.url}"]`);
+  if (existingScript) {
+    return Promise.resolve();
+  }
+
+  const promise = new Promise<void>((resolve) => {
+    const script = document.createElement('script');
+    script.src = item.url;
+    if (item.integrity) script.integrity = item.integrity;
+    if (item.crossOrigin) script.crossOrigin = item.crossOrigin;
+
+    script.onload = () => resolve();
+    script.onerror = (err) => {
+      console.error('Failed to load script:', item.url, err);
+      resolve();
+    };
+
+    document.head.appendChild(script);
+  });
+
+  scriptLoadingPromises.set(item.url, promise);
+  return promise;
+}
+
+export default async function dynamicallyLoadLib(lib: string): Promise<void> {
   const libs = getLibs();
   const libConf = libs[lib];
 
   if (!libConf) {
     console.warn('dynamicallyLoadLib: lib not found', lib);
-    return Promise.resolve();
+    return;
   }
 
   if (libConf.loaded()) {
-    return Promise.resolve();
+    return;
   }
 
   const jsList = Array.isArray(libConf.js) ? libConf.js : [libConf.js];
-  jsList.forEach((item) => {
-    const script = document.createElement('script');
-    script.src = item.url;
-    if (item.integrity) script.integrity = item.integrity;
-    if (item.crossOrigin) script.crossOrigin = item.crossOrigin;
-    document.head.appendChild(script);
-  });
 
-  return new Promise((resolve) => {
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-      if (libConf.loaded() || Date.now() - startTime > 10000) {
-        clearInterval(interval);
-        resolve();
-      }
-    }, 50);
-  });
+  // Load scripts sequentially in order so dependencies (e.g. core before daygrid) execute correctly
+  for (const item of jsList) {
+    await loadScript(item);
+  }
+
+  // Final verification polling guard (up to 3 seconds)
+  const startTime = Date.now();
+  while (!libConf.loaded() && Date.now() - startTime < 3000) {
+    await new Promise((r) => setTimeout(r, 50));
+  }
 }
