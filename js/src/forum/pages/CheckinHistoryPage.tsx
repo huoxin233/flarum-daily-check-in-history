@@ -19,10 +19,37 @@ export default class CheckinHistoryPage extends UserPage {
     this.loadUser(m.route.param('username'));
   }
 
+  canViewHistory(): boolean {
+    if (!this.user) {
+      return false;
+    }
+    const isSelf = !!(app.session.user && app.session.user.id() === this.user.id());
+    const canViewOthers = Boolean(app.forum.attribute('canQueryOthersHistory'));
+
+    return isSelf || canViewOthers;
+  }
+
+  show(user: any): void {
+    super.show(user);
+  }
+
   content(): Mithril.Children {
+    if (!this.canViewHistory()) {
+      return (
+        <div className="CheckinHistoryUserPage CheckinHistoryUserPage--noPermission Placeholder">
+          <p>{app.translator.trans('mattoid-daily-check-in-history.forum.page.permission-denied')}</p>
+        </div>
+      );
+    }
+
     return (
       <div className="CheckinHistoryUserPage">
-        <div id="calendar" />
+        <div
+          id="calendar"
+          oncreate={(vnode: Mithril.VnodeDOM) => {
+            this.renderCalendar(vnode.dom as HTMLElement);
+          }}
+        />
 
         {this.loadingHistory && (
           <div className="DiscussionList">
@@ -35,11 +62,6 @@ export default class CheckinHistoryPage extends UserPage {
     );
   }
 
-  oncreate(vnode: Mithril.VnodeDOM<any, this>): void {
-    super.oncreate(vnode);
-    this.renderCalendar();
-  }
-
   onremove(vnode: Mithril.VnodeDOM<any, this>): void {
     super.onremove(vnode);
 
@@ -50,6 +72,10 @@ export default class CheckinHistoryPage extends UserPage {
   }
 
   async getData(info: { start: Date; end: Date }): Promise<any[]> {
+    if (!this.canViewHistory()) {
+      return [];
+    }
+
     this.loadingHistory = true;
     m.redraw();
 
@@ -83,13 +109,22 @@ export default class CheckinHistoryPage extends UserPage {
     }
   }
 
-  async renderCalendar(): Promise<void> {
+  async renderCalendar(element?: HTMLElement): Promise<void> {
+    if (!this.canViewHistory()) {
+      return;
+    }
+
     await dynamicallyLoadLib('fullcalendar');
     await dynamicallyLoadLib('fullcalendarLocales');
 
-    const calendarEl = document.getElementById('calendar');
+    const calendarEl = element || document.getElementById('calendar');
     if (!calendarEl) {
       return;
+    }
+
+    if (this.calendar) {
+      this.calendar.destroy();
+      this.calendar = null;
     }
 
     const openModal = this.openCreateModal.bind(this);

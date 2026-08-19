@@ -12,7 +12,9 @@ declare module 'flarum/common/models/User' {
 declare module 'flarum/forum/components/UserPage' {
   export default interface UserPage {
     user: any;
+    loading: boolean;
     loadUser(username: string): any;
+    show(user: any): void;
   }
 }
 

@@ -6,6 +6,7 @@ mattoid-daily-check-in-history:
       checkin-card: "Checkin Card"
       checkin-card-count: "Check-in Cards: {count}"
       today: "Today"
+      permission-denied: "You do not have permission to view this user's check-in history."
     modal:
       checkin: "Check-in"
       supplement-checkin-desc: "Are you sure you want to supplement the check-in for {dateStr}?"

@@ -6,6 +6,7 @@ mattoid-daily-check-in-history:
       checkin-card: "补签卡"
       checkin-card-count: "补签卡：{count}"
       today: "今天"
+      permission-denied: "您没有权限查看该用户的签到历史。"
     modal:
       checkin: "补签"
       supplement-checkin-desc: "确认要补 {dateStr} 的签到吗？"
