@@ -13,6 +13,7 @@ mattoid-daily-check-in-history:
       submit: "Confirm"
     money-history:
       supplementary-checkin-reward: "Supplementary check-in reward"
+      supplementary-checkin-cost: "Supplementary check-in fee"
   admin:
     modal:
       give-success: "Successfully granted check-in cards to {count} user(s)."

@@ -271,14 +271,20 @@ class CheckinHistoryManager
      */
     protected function applyBalanceChange(User $user, float $amount): void
     {
+        $isCost = $amount < 0;
+        $source = $isCost ? 'SUPPLEMENTARY_CHECKIN_COST' : 'SUPPLEMENTARY_CHECKIN_REWARD';
+        $sourceKey = $isCost
+            ? 'mattoid-daily-check-in-history.forum.money-history.supplementary-checkin-cost'
+            : 'mattoid-daily-check-in-history.forum.money-history.supplementary-checkin-reward';
+
         if ($this->extensions->isEnabled('huoxin-money-with-history')) {
             /** @var BalanceManager $balanceManager */
             $balanceManager = $this->container->make(BalanceManager::class);
             $applied = $balanceManager->applyBalanceChange(
                 $user,
                 $amount,
-                'SUPPLEMENTARY_CHECKIN_REWARD',
-                'mattoid-daily-check-in-history.forum.money-history.supplementary-checkin-reward',
+                $source,
+                $sourceKey,
                 [],
                 $user,
                 preventOverdraft: true
