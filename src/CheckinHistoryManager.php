@@ -300,8 +300,7 @@ class CheckinHistoryManager
             ]);
         }
 
-        $user->money = $currentMoney + $amount;
-        $user->save();
+        $user->money = round($currentMoney + $amount, 6);
     }
 
     /**
