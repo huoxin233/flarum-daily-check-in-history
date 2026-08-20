@@ -178,4 +178,22 @@ class PostGiveCheckinCardTest extends TestCase
 
         $this->assertEquals(422, $response->getStatusCode());
     }
+
+    /**
+     * @test
+     */
+    public function disallows_giving_cards_with_non_existent_usernames()
+    {
+        $response = $this->send(
+            $this->request('POST', '/api/give/checkin/card', [
+                'authenticatedAs' => 1,
+            ])->withParsedBody([
+                'username' => 'non_existent_user_123',
+                'amount' => 5,
+                'range' => false,
+            ])
+        );
+
+        $this->assertEquals(422, $response->getStatusCode());
+    }
 }

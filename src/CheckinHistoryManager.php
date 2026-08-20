@@ -325,6 +325,8 @@ class CheckinHistoryManager
         }
 
         if ($allUsers) {
+            User::query()->whereNull('checkin_card')->update(['checkin_card' => 0]);
+
             return User::query()->increment('checkin_card', $amount);
         }
 
@@ -344,6 +346,15 @@ class CheckinHistoryManager
             ]);
         }
 
-        return User::query()->whereIn('username', $usernames)->increment('checkin_card', $amount);
+        User::query()->whereIn('username', $usernames)->whereNull('checkin_card')->update(['checkin_card' => 0]);
+        $count = User::query()->whereIn('username', $usernames)->increment('checkin_card', $amount);
+
+        if ($count === 0) {
+            throw new ValidationException([
+                'message' => $this->translator->trans('mattoid-daily-check-in-history.api.error.invalid-usernames'),
+            ]);
+        }
+
+        return $count;
     }
 }
