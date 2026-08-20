@@ -4,6 +4,7 @@ import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import extractText from 'flarum/common/utils/extractText';
 import dynamicallyLoadLib from '../utils/dynamicallyLoadLib';
 import SupplementCheckinModal from '../modal/SupplementCheckinModal';
+import dayjs from 'dayjs';
 import type Mithril from 'mithril';
 
 declare const FullCalendar: any;
@@ -147,7 +148,7 @@ export default class CheckinHistoryPage extends UserPage {
       return false;
     }
 
-    if (new Date(info.dateStr).getTime() > new Date().getTime()) {
+    if (dayjs(info.dateStr).isAfter(dayjs(), 'day')) {
       return false;
     }
 
